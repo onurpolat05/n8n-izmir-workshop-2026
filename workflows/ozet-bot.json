@@ -1,0 +1,286 @@
+{
+  "name": "n8n İzmir Workshop — /özet Bot (AI)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "trigger-ozet",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "ozet-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text.split(' ')[0] }}",
+                    "rightValue": "/hava",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "hava"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text.split(' ')[0] }}",
+                    "rightValue": "/özet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ozet"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-komut",
+      "name": "Switch (Komut)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=38.4237&longitude=27.1428&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FIstanbul",
+        "options": {}
+      },
+      "id": "http-hava",
+      "name": "Open-Meteo (/hava)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        760,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=İzmir Hava Durumu\n\nSıcaklık: {{ $json.current.temperature_2m }}°C\nRüzgar: {{ $json.current.windspeed_10m }} km/s",
+        "additionalFields": {}
+      },
+      "id": "send-hava",
+      "name": "Send /hava Cevap",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        180
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=38.4237&longitude=27.1428&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FIstanbul",
+        "options": {}
+      },
+      "id": "http-ozet",
+      "name": "Open-Meteo (/özet)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        760,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=İzmir hava verisini doğal dille kısa bir özetle (2-3 cümle).\nVeri: Sıcaklık {{ $json.current.temperature_2m }}°C, Rüzgar {{ $json.current.windspeed_10m }} km/s.\nTürkçe yaz, samimi ton, dışarı çıkacaklara giysi önerisi de ekle.",
+        "options": {}
+      },
+      "id": "ai-agent-ozet",
+      "name": "AI Agent (Gemini)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1020,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-exp",
+        "options": {}
+      },
+      "id": "gemini-chat-model",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        600
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "send-ozet",
+      "name": "Send /özet Cevap",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        420
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch (Komut)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch (Komut)": {
+      "main": [
+        [
+          {
+            "node": "Open-Meteo (/hava)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Open-Meteo (/özet)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open-Meteo (/hava)": {
+      "main": [
+        [
+          {
+            "node": "Send /hava Cevap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open-Meteo (/özet)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent (Gemini)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Gemini)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Send /özet Cevap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ozet-v1",
+  "meta": {
+    "instanceId": "n8n-izmir-workshop-2026"
+  },
+  "tags": [
+    {
+      "name": "workshop-izmir-2026"
+    }
+  ]
+}

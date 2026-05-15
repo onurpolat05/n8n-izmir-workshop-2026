@@ -1,0 +1,152 @@
+{
+  "name": "n8n İzmir Workshop — /hava Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "trigger-hava",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "hava-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text.split(' ')[0] }}",
+                    "rightValue": "/hava",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "hava"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-komut",
+      "name": "Switch (Komut)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=38.4237&longitude=27.1428&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FIstanbul",
+        "options": {}
+      },
+      "id": "http-open-meteo",
+      "name": "Open-Meteo Hava Verisi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=İzmir Hava Durumu\n\nSıcaklık: {{ $json.current.temperature_2m }}°C\nRüzgar: {{ $json.current.windspeed_10m }} km/s\n\nVeri kaynağı: Open-Meteo",
+        "additionalFields": {}
+      },
+      "id": "send-hava",
+      "name": "Send Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch (Komut)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch (Komut)": {
+      "main": [
+        [
+          {
+            "node": "Open-Meteo Hava Verisi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open-Meteo Hava Verisi": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "hava-v1",
+  "meta": {
+    "instanceId": "n8n-izmir-workshop-2026"
+  },
+  "tags": [
+    {
+      "name": "workshop-izmir-2026"
+    }
+  ]
+}

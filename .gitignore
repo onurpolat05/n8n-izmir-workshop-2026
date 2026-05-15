@@ -1,0 +1,24 @@
+# Credentials & secrets
+.env
+.env.*
+*credentials*
+*secret*
+*token*
+
+# n8n local
+.n8n/
+n8n.db
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# Editor
+.vscode/
+.idea/
+
+# Tmp
+*.tmp
+*.bak
+*.log

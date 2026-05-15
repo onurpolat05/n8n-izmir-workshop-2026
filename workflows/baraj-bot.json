@@ -1,0 +1,186 @@
+{
+  "name": "n8n İzmir Workshop — /baraj Bot (Bonus)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "trigger-baraj",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "baraj-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text.split(' ')[0] }}",
+                    "rightValue": "/baraj",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "baraj"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-baraj",
+      "name": "Switch (Komut)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://acikveri.bizizmir.com/tr/datastore/dump/REPLACE_WITH_BARAJ_RESOURCE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "http-baraj",
+      "name": "İBB Açık Veri (Baraj)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        760,
+        300
+      ],
+      "notes": "Tam URL: acikveri.bizizmir.com adresinden 'baraj doluluk' veri setini bul, resource_id'yi URL'ye yapıştır. Workshop sonrası ev ödevi olarak araştır."
+    },
+    {
+      "parameters": {
+        "jsCode": "// İBB CKAN API'dan gelen baraj verisini formatla\n// Her item bir baraj, fields: 'baraj_adi', 'doluluk_orani' (örnek)\n// API response yapısına göre alan adlarını güncelle\n\nconst items = $input.all();\nconst barajlar = items.map(item => {\n  const data = item.json;\n  // CKAN dump endpoint'i her satırı ayrı item olarak verir\n  return `${data.baraj_adi || 'Baraj'}: %${data.doluluk_orani || '?'}`;\n}).join('\\n');\n\nreturn [{\n  json: {\n    mesaj: `İzmir Baraj Doluluk Oranları\\n\\n${barajlar}\\n\\nKaynak: İBB Açık Veri`\n  }\n}];"
+      },
+      "id": "format-baraj",
+      "name": "Baraj Verisini Formatla",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.mesaj }}",
+        "additionalFields": {}
+      },
+      "id": "send-baraj",
+      "name": "Send Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram Bot — Workshop"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch (Komut)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch (Komut)": {
+      "main": [
+        [
+          {
+            "node": "İBB Açık Veri (Baraj)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "İBB Açık Veri (Baraj)": {
+      "main": [
+        [
+          {
+            "node": "Baraj Verisini Formatla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baraj Verisini Formatla": {
+      "main": [
+        [
+          {
+            "node": "Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "baraj-v1",
+  "meta": {
+    "instanceId": "n8n-izmir-workshop-2026"
+  },
+  "tags": [
+    {
+      "name": "workshop-izmir-2026"
+    },
+    {
+      "name": "bonus"
+    }
+  ]
+}
