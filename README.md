@@ -124,6 +124,8 @@ Import sonrası yapılacaklar:
 
 ---
 
+https://api.open-meteo.com/v1/forecast?latitude=38.4237&longitude=27.1428&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FIstanbul
+
 ## Yardım & İletişim
 
 - LinkedIn: [Onur Polat](https://www.linkedin.com/in/onurpolat05)

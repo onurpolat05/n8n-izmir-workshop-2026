@@ -22,3 +22,5 @@ Thumbs.db
 *.tmp
 *.bak
 *.log
+# MCP config contains API keys - NEVER commit
+.mcp.json

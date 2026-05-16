@@ -1,5 +1,4 @@
 {
-  "name": "n8n İzmir Workshop — /özet Bot (AI)",
   "nodes": [
     {
       "parameters": {
@@ -8,19 +7,19 @@
         ],
         "additionalFields": {}
       },
-      "id": "trigger-ozet",
+      "id": "dff21a1e-c4c2-4c69-bd0f-49e7ac56460f",
       "name": "Telegram Trigger",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1,
       "position": [
-        240,
-        300
+        -64,
+        -80
       ],
       "webhookId": "ozet-webhook",
       "credentials": {
         "telegramApi": {
-          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
-          "name": "Telegram Bot — Workshop"
+          "id": "7unmv3lw0DosvVAg",
+          "name": "Telegram account"
         }
       }
     },
@@ -31,9 +30,10 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -42,7 +42,8 @@
                     "operator": {
                       "type": "string",
                       "operation": "equals"
-                    }
+                    },
+                    "id": "8a23e641-35d7-470a-ad24-6dc3f2566ea0"
                   }
                 ],
                 "combinator": "and"
@@ -53,9 +54,10 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": false,
+                  "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict"
+                  "typeValidation": "strict",
+                  "version": 1
                 },
                 "conditions": [
                   {
@@ -64,7 +66,8 @@
                     "operator": {
                       "type": "string",
                       "operation": "equals"
-                    }
+                    },
+                    "id": "c07385a9-3cc4-4227-b460-7536f58472bb"
                   }
                 ],
                 "combinator": "and"
@@ -76,13 +79,13 @@
         },
         "options": {}
       },
-      "id": "switch-komut",
+      "id": "da3546e3-5c33-46ba-ad54-3b5e2d1e2609",
       "name": "Switch (Komut)",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
       "position": [
-        500,
-        300
+        208,
+        -80
       ]
     },
     {
@@ -90,35 +93,34 @@
         "url": "https://api.open-meteo.com/v1/forecast?latitude=38.4237&longitude=27.1428&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FIstanbul",
         "options": {}
       },
-      "id": "http-hava",
+      "id": "5021e6b8-bffd-4c63-9711-1bb18a4e6671",
       "name": "Open-Meteo (/hava)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        760,
-        180
+        464,
+        -192
       ]
     },
     {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
         "text": "=İzmir Hava Durumu\n\nSıcaklık: {{ $json.current.temperature_2m }}°C\nRüzgar: {{ $json.current.windspeed_10m }} km/s",
         "additionalFields": {}
       },
-      "id": "send-hava",
+      "id": "1c5bfdd1-99e5-4ebc-b76e-e9065712af73",
       "name": "Send /hava Cevap",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [
-        1020,
-        180
+        736,
+        -192
       ],
+      "webhookId": "53c3f2bc-5e8c-4a58-b3e7-be786931a000",
       "credentials": {
         "telegramApi": {
-          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
-          "name": "Telegram Bot — Workshop"
+          "id": "7unmv3lw0DosvVAg",
+          "name": "Telegram account"
         }
       }
     },
@@ -127,13 +129,13 @@
         "url": "https://api.open-meteo.com/v1/forecast?latitude=38.4237&longitude=27.1428&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe%2FIstanbul",
         "options": {}
       },
-      "id": "http-ozet",
+      "id": "c5016d73-8e59-4884-b034-5b4961827722",
       "name": "Open-Meteo (/özet)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        760,
-        420
+        464,
+        48
       ]
     },
     {
@@ -142,55 +144,53 @@
         "text": "=İzmir hava verisini doğal dille kısa bir özetle (2-3 cümle).\nVeri: Sıcaklık {{ $json.current.temperature_2m }}°C, Rüzgar {{ $json.current.windspeed_10m }} km/s.\nTürkçe yaz, samimi ton, dışarı çıkacaklara giysi önerisi de ekle.",
         "options": {}
       },
-      "id": "ai-agent-ozet",
+      "id": "9b46729a-753d-4fba-8e88-5a7061a2c749",
       "name": "AI Agent (Gemini)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1020,
-        420
+        736,
+        48
       ]
     },
     {
       "parameters": {
-        "modelName": "models/gemini-2.0-flash-exp",
         "options": {}
       },
-      "id": "gemini-chat-model",
+      "id": "ef5c9da0-5d69-4fef-b8a1-56ce3b52c154",
       "name": "Google Gemini Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        1020,
-        600
+        736,
+        240
       ],
       "credentials": {
         "googlePalmApi": {
-          "id": "YOUR_GEMINI_CREDENTIAL_ID",
-          "name": "Google Gemini API"
+          "id": "NSsaF7HSQNGL4TOu",
+          "name": "n8n-workshop"
         }
       }
     },
     {
       "parameters": {
-        "resource": "message",
-        "operation": "sendMessage",
         "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
         "text": "={{ $json.output }}",
         "additionalFields": {}
       },
-      "id": "send-ozet",
+      "id": "b9c585a3-1aa8-4d02-85bc-1a9bec73271c",
       "name": "Send /özet Cevap",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [
-        1280,
-        420
+        1264,
+        48
       ],
+      "webhookId": "25fa052d-aafa-4d0f-b3d4-dcb3945ea1e3",
       "credentials": {
         "telegramApi": {
-          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
-          "name": "Telegram Bot — Workshop"
+          "id": "7unmv3lw0DosvVAg",
+          "name": "Telegram account"
         }
       }
     }
@@ -247,17 +247,6 @@
         ]
       ]
     },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent (Gemini)",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "AI Agent (Gemini)": {
       "main": [
         [
@@ -268,19 +257,22 @@
           }
         ]
       ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent (Gemini)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "ozet-v1",
+  "pinData": {},
   "meta": {
-    "instanceId": "n8n-izmir-workshop-2026"
-  },
-  "tags": [
-    {
-      "name": "workshop-izmir-2026"
-    }
-  ]
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ae83a3ddec8f2c3c51c2bd78ad85a0d764d724a0de2383225c79461e78ffe200"
+  }
 }
